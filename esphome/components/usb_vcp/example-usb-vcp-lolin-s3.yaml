@@ -1,0 +1,68 @@
+esphome:
+  name: usb-vcp
+
+esp32:
+  board: lolin_s3
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    version: 5.3.1
+    platform_version: 6.9.0
+    components:
+      - name: usb_host_ch34x_vcp
+        source: github://linuxrider/esp-usb@esphome
+        path: host/class/cdc/usb_host_ch34x_vcp
+      - name: usb_host_cp210x_vcp
+        source: github://linuxrider/esp-usb@esphome
+        path: host/class/cdc/usb_host_cp210x_vcp
+      - name: usb_host_ftdi_vcp
+        source: github://linuxrider/esp-usb@esphome
+        path: host/class/cdc/usb_host_ftdi_vcp
+      - name: usb_host_vcp
+        source: github://linuxrider/esp-usb@esphome
+        path: host/class/cdc/usb_host_vcp
+      - name: usb_host_cdc_acm
+        source: github://linuxrider/esp-usb@esphome
+        path: host/class/cdc/usb_host_cdc_acm
+
+logger:
+  level: DEBUG # VERBOSE DEBUG INFO WARN ERROR
+  hardware_uart: UART0 # UART0, UART1, USB_CDC, USB_SERIAL_JTAG
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  id: wifi_id
+  ssid: !secret wifi_ssid
+
+mqtt:
+  broker: !secret mqttu_server
+  port: !secret mqttu_port
+  username: !secret mqttu_username
+  password: !secret mqttu_password
+  skip_cert_cn_check: true
+  discovery: false
+  discover_ip: false
+  certificate_authority: !secret mqttu_certificate
+
+external_components:
+  - source:
+      type: local
+      path: ./esphome/esphome/components
+    components: [ usb_vcp ]
+
+usb_vcp:
+  baud_rate: 9600
+  stop_bits: 2
+  parity: NONE
+  data_bits: 8
+  handshake: RTS/CTS
+  id: usb_vcp1
+
+text_sensor:
+  - platform: usb_vcp
+    received:
+      name: USB VCP received
+      state_topic: ph_meter/lab865_18450416/lab865_message
